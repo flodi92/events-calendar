@@ -1,0 +1,5 @@
+{
+  "name": "Leipzig Cultural Calendar",
+  "description": "An automated event aggregator for Leipzig's major cultural venues, featuring year and week views with smart event categorization.",
+  "requestFramePermissions": []
+}
