@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { format, startOfWeek, endOfWeek, startOfYear, endOfYear, addWeeks, subWeeks, addYears, subYears, parseISO } from 'date-fns';
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, addYears, subYears } from 'date-fns';
 import { CalendarEvent, ViewMode, GroundingSource, SourceConfig } from './types.ts';
 import { fetchEventsFromWeb } from './services/geminiService';
 import CalendarHeader from './components/CalendarHeader';
@@ -176,6 +175,7 @@ const App: React.FC = () => {
               yearDate={currentDate} 
               events={events} 
               onDayClick={handleDayClick} 
+              sourcesConfig={sourcesConfig}
             />
           ) : (
             <WeekView 
@@ -183,6 +183,7 @@ const App: React.FC = () => {
               events={events}
               selectedIds={selectedEventIds}
               onToggleSelection={toggleEventSelection}
+              sourcesConfig={sourcesConfig}
             />
           )}
         </div>

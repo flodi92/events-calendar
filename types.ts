@@ -1,17 +1,10 @@
-
-export enum Organizer {
-  THEATER_EUMENIDEN = 'Theater Eumeniden',
-  GEWANDHAUS = 'Gewandhausorchester',
-  ANKER = 'Anker Leipzig'
-}
-
 export interface CalendarEvent {
   id: string;
   title: string;
   date: string; // ISO format YYYY-MM-DD
   time: string; // HH:mm format
   location: string;
-  organizer: Organizer | string;
+  organizer: string;
   url?: string;
   description?: string;
 }

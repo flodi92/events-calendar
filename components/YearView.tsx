@@ -1,16 +1,17 @@
-
 import React from 'react';
 import { format, startOfYear, addMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
-import { CalendarEvent, Organizer } from '../types.ts';
-import { ORGANIZER_STYLES } from '../constants.tsx';
+import { CalendarEvent, SourceConfig } from '../types.ts';
+import { ORGANIZER_STYLES_ARRAY } from '../constants.tsx';
+import { getStyleForOrganizer } from '../utils.ts';
 
 interface YearViewProps {
   yearDate: Date;
   events: CalendarEvent[];
   onDayClick: (date: Date) => void;
+  sourcesConfig: SourceConfig[];
 }
 
-const YearView: React.FC<YearViewProps> = ({ yearDate, events, onDayClick }) => {
+const YearView: React.FC<YearViewProps> = ({ yearDate, events, onDayClick, sourcesConfig }) => {
   const months = Array.from({ length: 12 }, (_, i) => addMonths(startOfYear(yearDate), i));
 
   const renderMonth = (monthDate: Date) => {
@@ -46,10 +47,12 @@ const YearView: React.FC<YearViewProps> = ({ yearDate, events, onDayClick }) => 
                 {isCurrentMonth && distinctOrganizers.length > 0 && (
                   <div className="absolute bottom-1 flex gap-0.5 justify-center">
                     {distinctOrganizers.map((org, i) => {
-                      const isKnown = Object.values(Organizer).includes(org as Organizer);
-                      const color = isKnown ? ORGANIZER_STYLES[org as Organizer].accent : 'bg-slate-400';
-                      return (
-                        <div 
+                      // find a representative event for this organizer to possibly get a URL
+                      const repEvent = events.find(e => e.organizer === org);
+                      const style = getStyleForOrganizer(org as string, repEvent?.url as string | undefined, (sourcesConfig || []) as import('../types.ts').SourceConfig[], ORGANIZER_STYLES_ARRAY);
+                       const color = style?.accent || 'bg-slate-400';
+                       return (
+                        <div
                           key={i}
                           className={`w-1 h-1 rounded-full ${color}`} 
                         />

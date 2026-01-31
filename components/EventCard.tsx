@@ -1,26 +1,21 @@
-
 import React from 'react';
-import { CalendarEvent, Organizer } from '../types.ts';
-import { ORGANIZER_STYLES } from '../constants.tsx';
+import { CalendarEvent, SourceConfig } from '../types.ts';
+import { ORGANIZER_STYLES_ARRAY } from '../constants.tsx';
+import { getStyleForOrganizer } from '../utils.ts';
 import { Clock, MapPin, ExternalLink, Check } from 'lucide-react';
 
 interface EventCardProps {
   event: CalendarEvent;
   isSelected: boolean;
   onToggle: (id: string) => void;
+  sourcesConfig: SourceConfig[];
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event, isSelected, onToggle }) => {
-  // Check if organizer is a known enum value, otherwise provide default styling
-  const isKnownOrganizer = Object.values(Organizer).includes(event.organizer as Organizer);
-  const styles = isKnownOrganizer 
-    ? ORGANIZER_STYLES[event.organizer as Organizer] 
-    : {
-        bg: 'bg-slate-50',
-        text: 'text-slate-700',
-        border: 'border-slate-200',
-        accent: 'bg-slate-600'
-      };
+const EventCard: React.FC<EventCardProps> = ({ event, isSelected, onToggle, sourcesConfig }) => {
+  const styles = getStyleForOrganizer(event.organizer, event.url, sourcesConfig || [], ORGANIZER_STYLES_ARRAY);
+
+  // NOTE: The component expects a prop `sourcesConfig` provided by its parent. If it's not available
+  // the helper will still return a deterministic fallback style.
 
   const organizerContent = (
     <span className={`text-[10px] uppercase font-black tracking-widest ${styles.text} flex items-center gap-1`}>

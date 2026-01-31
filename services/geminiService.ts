@@ -1,6 +1,5 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
-import { CalendarEvent, Organizer, FetchEventsResponse, GroundingSource } from "../types.ts";
+import { FetchEventsResponse, GroundingSource } from "../types.ts";
 
 export const fetchEventsFromWeb = async (urls: string[]): Promise<FetchEventsResponse> => {
   if (urls.length === 0) return { events: [], sources: [] };

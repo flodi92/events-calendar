@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
-import { CalendarEvent } from '../types.ts';
+import { CalendarEvent, SourceConfig } from '../types.ts';
 import EventCard from './EventCard.tsx';
 
 interface WeekViewProps {
@@ -9,9 +8,10 @@ interface WeekViewProps {
   events: CalendarEvent[];
   selectedIds: Set<string>;
   onToggleSelection: (id: string) => void;
+  sourcesConfig: SourceConfig[];
 }
 
-const WeekView: React.FC<WeekViewProps> = ({ weekDate, events, selectedIds, onToggleSelection }) => {
+const WeekView: React.FC<WeekViewProps> = ({ weekDate, events, selectedIds, onToggleSelection, sourcesConfig }) => {
   const start = startOfWeek(weekDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(start, i));
 
@@ -47,6 +47,7 @@ const WeekView: React.FC<WeekViewProps> = ({ weekDate, events, selectedIds, onTo
                     event={event} 
                     isSelected={selectedIds.has(event.id)}
                     onToggle={onToggleSelection}
+                    sourcesConfig={sourcesConfig}
                   />
                 ))
               ) : (
