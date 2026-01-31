@@ -1,22 +1,15 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { format, startOfWeek, endOfWeek, startOfYear, endOfYear, addWeeks, subWeeks, addYears, subYears, parseISO, isSameDay } from 'date-fns';
-import { CalendarEvent, ViewMode, GroundingSource, SourceConfig } from './types';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { format, startOfWeek, endOfWeek, startOfYear, endOfYear, addWeeks, subWeeks, addYears, subYears, parseISO } from 'date-fns';
+import { CalendarEvent, ViewMode, GroundingSource, SourceConfig } from './types.ts';
 import { fetchEventsFromWeb } from './services/geminiService';
 import CalendarHeader from './components/CalendarHeader';
 import YearView from './components/YearView';
 import WeekView from './components/WeekView';
 import SourceManager from './components/SourceManager';
-import { AlertCircle, Calendar, Sparkles, Download, CloudSync, CheckCircle2, XCircle } from 'lucide-react';
-
-declare global {
-  interface Window {
-    google: any;
-  }
-}
+import { AlertCircle, Calendar, Sparkles, Download } from 'lucide-react';
 
 const STORAGE_KEY = 'leipzig_calendar_sources_v1';
-// This is a placeholder Client ID. In a production environment, the user would provide their own.
-const GOOGLE_CLIENT_ID = '355815664320-v7v0j7k76b1b7t6e863q7j2j8q8h7k7v.apps.googleusercontent.com';
 
 const DEFAULT_SOURCES: SourceConfig[] = [
   { id: 'eumeniden', url: 'https://theatereumeniden.de/spielplan/', active: true },
@@ -40,40 +33,11 @@ const App: React.FC = () => {
   });
   const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const tokenClientRef = useRef<any>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sourcesConfig));
   }, [sourcesConfig]);
-
-  // Google SDK Initialization
-  useEffect(() => {
-    const initGsi = () => {
-      if (window.google && window.google.accounts) {
-        tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID,
-          scope: 'https://www.googleapis.com/auth/calendar.events',
-          callback: '', // Handled at call time
-        });
-      }
-    };
-
-    if (window.google) {
-      initGsi();
-    } else {
-      const checkInterval = setInterval(() => {
-        if (window.google) {
-          initGsi();
-          clearInterval(checkInterval);
-        }
-      }, 500);
-      return () => clearInterval(checkInterval);
-    }
-  }, []);
 
   const updateEvents = useCallback(async () => {
     const activeUrls = sourcesConfig.filter(s => s.active).map(s => s.url);
@@ -171,65 +135,6 @@ const App: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  const handleSyncGoogle = () => {
-    if (!tokenClientRef.current) {
-      setError("Google SDK not loaded properly. Please refresh the page.");
-      return;
-    }
-
-    setIsSyncing(true);
-    setError(null);
-
-    tokenClientRef.current.callback = async (response: any) => {
-      if (response.error !== undefined) {
-        setIsSyncing(false);
-        setError(`Google login failed: ${response.error_description || response.error}`);
-        return;
-      }
-
-      const selectedEvents = events.filter(e => selectedEventIds.has(e.id));
-      let successCount = 0;
-
-      try {
-        for (const event of selectedEvents) {
-          const startTime = `${event.date}T${event.time || '19:30'}:00`;
-          const endHour = (parseInt((event.time || '19:30').split(':')[0]) + 2).toString().padStart(2, '0');
-          const endTime = `${event.date}T${endHour}:30:00`;
-
-          const gEvent = {
-            summary: event.title,
-            location: event.location,
-            description: `Organisator: ${event.organizer}\nLink: ${event.url || 'N/A'}`,
-            start: { dateTime: startTime, timeZone: 'Europe/Berlin' },
-            end: { dateTime: endTime, timeZone: 'Europe/Berlin' },
-          };
-
-          const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${response.access_token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(gEvent),
-          });
-
-          if (res.ok) successCount++;
-        }
-
-        if (successCount > 0) {
-          setSuccessMessage(`${successCount} events successfully added to your Google Calendar.`);
-          setTimeout(() => setSuccessMessage(null), 5000);
-        }
-      } catch (err) {
-        setError("Error while sending events to Google Calendar.");
-      } finally {
-        setIsSyncing(false);
-      }
-    };
-
-    tokenClientRef.current.requestAccessToken({ prompt: 'consent' });
-  };
-
   const getHeaderLabel = () => {
     if (viewMode === 'week') {
       const start = startOfWeek(currentDate, { weekStartsOn: 1 });
@@ -252,39 +157,20 @@ const App: React.FC = () => {
         onRefresh={updateEvents}
         onOpenSources={() => setIsSourceModalOpen(true)}
         onExport={handleExport}
-        onSyncGoogle={handleSyncGoogle}
         selectedCount={selectedEventIds.size}
         isLoading={isLoading}
-        isSyncing={isSyncing}
         label={getHeaderLabel()}
       />
 
-      <main className="flex-1 flex flex-col relative overflow-hidden">
-        {/* Status Messages */}
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4 pointer-events-none">
-          <div className="space-y-2 pointer-events-auto">
-            {error && (
-              <div className="p-4 bg-red-600 text-white rounded-2xl shadow-xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500">
-                <div className="flex items-center gap-3">
-                  <AlertCircle size={20} className="shrink-0" />
-                  <p className="text-sm font-bold leading-tight">{error}</p>
-                </div>
-                <button onClick={() => setError(null)}><XCircle size={18} /></button>
-              </div>
-            )}
-            {successMessage && (
-              <div className="p-4 bg-green-600 text-white rounded-2xl shadow-xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 size={20} className="shrink-0" />
-                  <p className="text-sm font-bold leading-tight">{successMessage}</p>
-                </div>
-                <button onClick={() => setSuccessMessage(null)}><XCircle size={18} /></button>
-              </div>
-            )}
+      <main className="flex-1 flex flex-col relative">
+        {error && (
+          <div className="m-4 md:m-8 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <AlertCircle size={20} className="shrink-0" />
+            <p className="text-sm font-semibold">{error}</p>
           </div>
-        </div>
+        )}
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1">
           {viewMode === 'year' ? (
             <YearView 
               yearDate={currentDate} 
@@ -331,7 +217,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Action Bar */}
+      {/* Floating Action Bar - Matching Screenshot */}
       {selectedEventIds.size > 0 && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-bottom-8 duration-300">
           <div className="bg-slate-900 text-white px-8 py-4 rounded-[2rem] shadow-2xl flex items-center gap-8 border border-white/10 backdrop-blur-md">
@@ -340,23 +226,13 @@ const App: React.FC = () => {
               <span className="text-xs font-bold">{selectedEventIds.size} {selectedEventIds.size === 1 ? 'Event' : 'Events'}</span>
             </div>
             
-            <div className="flex gap-2">
-              <button 
-                onClick={handleExport}
-                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all active:scale-95 border border-white/5"
-              >
-                <Download size={14} />
-                Export .ics
-              </button>
-              <button 
-                onClick={handleSyncGoogle}
-                disabled={isSyncing}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50"
-              >
-                <CloudSync size={14} className={isSyncing ? 'animate-bounce' : ''} />
-                {isSyncing ? 'Syncing...' : 'Sync to Google'}
-              </button>
-            </div>
+            <button 
+              onClick={handleExport}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+            >
+              <Download size={14} />
+              Export .ics
+            </button>
             
             <button 
               onClick={() => setSelectedEventIds(new Set())}

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Organizer, OrganizerStyles } from './types';
+import { Organizer, OrganizerStyles } from './types.ts';
 
 export const ORGANIZER_STYLES: Record<Organizer, OrganizerStyles> = {
   [Organizer.THEATER_EUMENIDEN]: {

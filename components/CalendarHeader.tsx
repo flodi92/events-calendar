@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { ChevronLeft, ChevronRight, RefreshCw, Calendar, Columns, Settings2, Download, CloudSync } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RefreshCw, Calendar, Columns, Settings2, Download } from 'lucide-react';
 import { ViewMode } from '../types.ts';
 
 interface CalendarHeaderProps {
@@ -10,10 +11,8 @@ interface CalendarHeaderProps {
   onRefresh: () => void;
   onOpenSources: () => void;
   onExport: () => void;
-  onSyncGoogle: () => void;
   selectedCount: number;
   isLoading: boolean;
-  isSyncing: boolean;
   label: string;
 }
 
@@ -25,10 +24,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onRefresh,
   onOpenSources,
   onExport,
-  onSyncGoogle,
   selectedCount,
   isLoading,
-  isSyncing,
   label
 }) => {
   return (
@@ -78,8 +75,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         </div>
 
         {/* Action Group Container */}
-        <div className="flex items-center bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-          {/* Export Button */}
+        <div className="flex items-center bg-white border border-blue-600 rounded-xl overflow-hidden shadow-sm">
+          {/* Export Button - Visible when items selected */}
           <button
             onClick={onExport}
             disabled={selectedCount === 0}
@@ -91,20 +88,6 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           >
             <Download size={14} />
             Export {selectedCount > 0 ? `(${selectedCount})` : ''}
-          </button>
-
-          {/* Synchronize Button - Positioning it next to Export */}
-          <button
-            onClick={onSyncGoogle}
-            disabled={selectedCount === 0 || isSyncing}
-            className={`flex items-center justify-center gap-2 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all border-r border-slate-200 ${
-              selectedCount > 0 
-                ? 'bg-white text-blue-600 hover:bg-blue-50' 
-                : 'bg-slate-50 text-slate-300 cursor-not-allowed'
-            }`}
-          >
-            <CloudSync size={14} className={isSyncing ? 'animate-bounce' : ''} />
-            {isSyncing ? 'Syncing...' : 'Synchronize'}
           </button>
 
           {/* Sources Button */}
@@ -127,7 +110,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             }`}
           >
             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-            {isLoading ? 'Wait' : 'Refresh'}
+            {isLoading ? 'Syncing' : 'Refresh'}
           </button>
         </div>
       </div>
