@@ -23,8 +23,3 @@ export const ORGANIZER_STYLES: Record<Organizer, OrganizerStyles> = {
   }
 };
 
-export const SOURCE_URLS = [
-  'https://theatereumeniden.de/spielplan/',
-  'https://www.gewandhausorchester.de/',
-  'https://anker-leipzig.de/va/veranstaltungen/'
-];
