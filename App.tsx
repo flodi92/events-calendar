@@ -13,7 +13,26 @@ const STORAGE_KEY = 'leipzig_calendar_sources_v1';
 const DEFAULT_SOURCES: SourceConfig[] = [
   { id: 'eumeniden', url: 'https://theatereumeniden.de/spielplan/', active: true },
   { id: 'gewandhaus', url: 'https://www.gewandhausorchester.de/', active: true },
-  { id: 'anker', url: 'https://anker-leipzig.de/va/veranstaltungen/', active: true }
+  { id: 'anker', url: 'https://anker-leipzig.de/va/veranstaltungen/', active: true },
+  { id: 'meetup', url: 'https://www.meetup.com/de-DE/find/?location=de--Leipzig&source=EVENTS&eventType=online', active: true },
+  { id: 'schauspiel-leipzig', url: 'https://www.schauspiel-leipzig.de/spielplan/monatsplan/', active: true },
+  { id: 'oper-leipzig', url: 'https://www.oper-leipzig.de/de/spielplan/', active: true },
+  { id: 'musikalische-komoedie', url: 'https://www.oper-leipzig.de/de/musikalische-komoedie/spielplan/', active: true },
+  { id: 'neues-schauspiel', url: 'https://neuesschauspielleipzig.de/spielplan/', active: true },
+  { id: 'theater-der-jungen-welt', url: 'https://www.tdjw.de/spielplan/', active: true },
+  { id: 'westfluegel', url: 'https://www.westfluegel.de/programm/spielplan/', active: true },
+  { id: 'schaubuehne-lindenfels', url: 'https://www.schaubuehne.com/spielplan/', active: true },
+  { id: 'lofft', url: 'https://www.lofft.de/spielplan/', active: true },
+  { id: 'theaterhaus-schille', url: 'https://www.theaterhaus-schille.de/spielplan/', active: true },
+  { id: 'komoedie-leipzig', url: 'https://www.komoedie-leipzig.de/spielplan/', active: true },
+  { id: 'theaterpack', url: 'https://www.theaterpack.de/spielplan/', active: true },
+  { id: 'sanftwut', url: 'https://www.sanftwut.de/spielplan/', active: false },
+  { id: 'central-kabarett', url: 'https://www.central-kabarett.de/spielplan/', active: false },
+  // { id: 'puppentheater-sterntaler', url: 'https://www.puppentheater-sterntaler.de/spielplan/', active: true },
+  // { id: 'kindermusical-leipzig', url: 'https://www.kindermusical-leipzig.de/spielplan/', active: true },
+  // { id: 'frauenzimmertheater', url: 'https://www.frauenzimmertheater.de/spielplan/', active: true },
+  { id: 'buehne-le', url: 'https://www.buehne-le.de/spielplan/', active: true }
+
 ];
 
 const App: React.FC = () => {
